@@ -1,0 +1,27 @@
+
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: antigravity-web
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+    command: node server.js
+
+  worker:
+    build: .
+    container_name: antigravity-worker
+    restart: always
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./downloads:/app/downloads
+    command: node dist/scripts/worker.js
