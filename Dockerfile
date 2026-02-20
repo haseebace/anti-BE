@@ -1,6 +1,13 @@
 
 # 1. Base image
-FROM node:20-alpine AS base
+FROM node:20-slim AS base
+
+# Install build dependencies for native modules and basic utils
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # 2. Dependencies
 FROM base AS deps
@@ -29,9 +36,10 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# In Debian, addgroup/adduser syntax is different or we can just use defaults
+# But for security we keep the non-root user
+RUN groupadd --system --gid 1001 nodejs
+RUN useradd --system --uid 1001 nextjs -g nodejs
 
 # Copy Next.js public & static files
 COPY --from=builder /app/public ./public
